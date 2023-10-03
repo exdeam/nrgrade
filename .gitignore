@@ -1,0 +1,6 @@
+# VENV
+venv/
+
+#NEXT
+next/core/node_modules
+next/core/.next

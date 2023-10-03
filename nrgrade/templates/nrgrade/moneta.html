@@ -1,0 +1,19 @@
+{% extends "nrgrade/base.html" %}
+{% block title %}Монеты из категории {{title}}{% endblock %}
+
+{% block content %}
+<main>
+    <section>
+	<div class="container">
+	    <h1>Монеты из категории {{name}}</h1>
+	</div>
+    </section>
+	<div>
+		{% for moneta in object_list%}
+		<div>
+				<h3>{{moneta}}</h3>
+		</div>
+		{% endfor %}
+    </div>
+</main>
+{% endblock %}
