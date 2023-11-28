@@ -1,11 +1,15 @@
 import graphene
 from graphene_django import DjangoObjectType
+from graphene_django.converter import convert_django_field
 
 from .models import Moneta, Category
+from website.models import Menu,  Page
+from news.models import News
 
 sohran = ( 'MS70', 'MS69', 'MS68', 'MS67', 'MS66', 'MS65', 'MS64', 'MS63', 'MS62',
            'MS61', 'MS60', 'AU58', 'AU55', 'AU53', 'AU50', 'XF45', 'XF40', 'VF35',
              'VF30', 'VF25', 'VF20', 'F15', 'F12', 'VG10', 'VG8', 'G6', 'G4', 'AG3', 'F2', 'P1' )
+
 
 class MonetaType(DjangoObjectType):
     class Meta:
@@ -17,8 +21,17 @@ class CategoryType(DjangoObjectType):
     class Meta:
         model = Category
         fields = ('id', 'name', 'slug', 'images', 'years')
-            
 
+class MenuType(DjangoObjectType):
+    class Meta:
+        model = Menu
+        fields = ('id', 'name', 'slug')
+
+class PageType(DjangoObjectType):
+    class Meta:
+        model = Page
+        fields = ('id', 'name', 'slug', 'text', 'category', 'title', 'description', 'keywords')
+            
 class Mycount(graphene.ObjectType):
     text = graphene.String()
 
@@ -27,7 +40,6 @@ class AllCount(graphene.ObjectType):
 
 class MonetsInfo(graphene.ObjectType):
     info = graphene.JSONString()
-
 
 class Query(graphene.ObjectType):
     all_Monets = graphene.List(MonetaType, id=graphene.ID(required=True))
@@ -42,6 +54,18 @@ class Query(graphene.ObjectType):
     second_of_Category = graphene.List(CategoryType, slug=graphene.String(required=True))
     current_Category_byid = graphene.List(CategoryType, id=graphene.ID(required=True))
     current_Category_byslug = graphene.List(CategoryType, slug=graphene.String(required=True))
+    all_Menu = graphene.List(MenuType)
+    all_Page_bycat = graphene.List(PageType, id=graphene.ID(required=True))
+    cur_Page = graphene.List(PageType, slug=graphene.String(required=True))
+
+    def resolve_all_Menu(root, info):
+        return Menu.objects.all()
+    
+    def resolve_cur_Page(root, info, slug):        
+        return Page.objects.all().filter(slug=slug)
+    
+    def resolve_all_Page_bycat(root, info, id):        
+        return Page.objects.filter(category__id=id)
 
     def resolve_count(root, info, id):        
         res = Moneta.objects.filter(category__id=id).count()

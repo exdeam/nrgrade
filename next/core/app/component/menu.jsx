@@ -1,47 +1,55 @@
+import { gql } from "@apollo/client"
+import { getClient } from "../../api/apollo-client"
+import Dropdown from "./dropdown"
 import Link from "next/link"
 
-export default async function Menu({ }) {
+export default async function Menu() {
 
+  const { data } = await getClient().query({
+    query: GET_MENU,
+    context: {
+      fetchOptions: {
+        next: { revalidate: 60 },
+      },
+    },
+  })
+  
   return (
     <nav className="main_menu">
       <div className="menu__wrapper">
-        <div className="menu__wrapper-inner">
-          <div className="drop">
-            <Link href="/products/">
-              <div>Услуги</div>
-            </Link>
-          </div>
-          <div className="dropdown-content drop-size">
-            <Link href="/sertification/">Сертификация слабирование монет</Link>            
-          </div>
-        </div>
-        <Link href="/akcii/">
-          <div className="menu__wrapper-inner">
-            <div className="drop">Сертификация</div>
-          </div>
-        </Link>
-        <Link href="/oborudovanie/">
-          <div className="menu__wrapper-inner">
-            <div className="drop">Информация</div>
-          </div>
-        </Link>
-        <Link href="/partneram/">
-          <div className="menu__wrapper-inner">
-            <div className="drop">О нас</div>
-          </div>
-        </Link>
-        <Link href="/delivery/">
-          <div className="menu__wrapper-inner">
-            <div className="drop">Контакты</div>
-          </div>
-        </Link>
-        <Link href="/base/">
-          <div className="menu__wrapper-inner">
-            <div className="drop">База данных</div>
-          </div>
-        </Link>
+        {data.allMenu.map((item) => {          
+              if (item.slug === "base") {
+                return (
+                  <div className="menu__wrapper-inner" key={item.id}>
+                    <div className="drop" key={item.id}>
+                      <Link href="/base"><div key={item.id}>{item.name}</div></Link>
+                    </div>
+                    
+                  </div>
+                )
+              }
+              return (
+                  <div className="menu__wrapper-inner" key={item.id}>
+                    <div className="drop" key={item.id}>
+                      <div key={item.id}>{item.name}</div>
+                    </div>
+                      <Dropdown name={item.id} slug={item.slug} />
+                  </div>
+              )
+            }
+          )
+        } 
       </div>
     </nav>
   )
 }
 
+const GET_MENU = gql`
+  query {
+    allMenu {
+      id
+      name
+      slug
+    }
+  }
+`
